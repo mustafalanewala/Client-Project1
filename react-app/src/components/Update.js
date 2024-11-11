@@ -68,7 +68,7 @@ function Update() {
     updateUser(id, inputs).then(
       (data) => {
         console.log("user =>>", data);
-        history.push("/");
+        history.push("/read");
       },
       (error) => {
         console.log("error =>>", error);
@@ -78,7 +78,7 @@ function Update() {
 
   return (
     <React.Fragment>
-      <h1 style={{ textAlign: "center" }}>Update User</h1>
+      <h1 style={{ textAlign: "center" }}>Update Employee</h1>
       <form
         className={classes.root}
         style={{

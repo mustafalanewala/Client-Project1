@@ -51,7 +51,7 @@ function Create() {
     createUser(inputs).then(
       (data) => {
         console.log("user =>>", data);
-        history.push("/");
+        history.push("/read");
       },
       (error) => {
         console.log("error =>>", error);

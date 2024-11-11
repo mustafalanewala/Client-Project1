@@ -1,69 +1,112 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { readUsers, deleteUser } from "./../services/user";
-
-import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import Icon from "@material-ui/core/Icon";
+import { makeStyles, useTheme } from "@material-ui/core/styles";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Icon,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  useMediaQuery,
+} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import { useTheme } from "@material-ui/core/styles";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    textAlign: "center",
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
+  appBar: {
+    marginBottom: theme.spacing(2),
+    backgroundColor: "#2196f3",
   },
   title: {
     flexGrow: 1,
-    textAlign: "center",
   },
-  button: {
-    margin: theme.spacing(1),
+  greeting: {
+    marginRight: theme.spacing(2),
+    fontWeight: "bold",
+  },
+  addButton: {
+    marginBottom: theme.spacing(2),
+    color: "#fff",
+    backgroundColor: "#4caf50",
+    "&:hover": {
+      backgroundColor: "#388e3c",
+    },
+  },
+  tableContainer: {
+    maxWidth: "80%",
+    margin: "auto",
+    marginTop: theme.spacing(2),
   },
   table: {
-    flex: 1,
-    alignContent: "center",
-    justifyContent: "center",
+    minWidth: 650,
+    "& th": {
+      backgroundColor: "#f5f5f5",
+      fontWeight: "bold",
+    },
+    "& th, & td": {
+      padding: theme.spacing(2),
+      textAlign: "center",
+    },
+  },
+  iconButton: {
+    cursor: "pointer",
+    color: theme.palette.text.secondary,
+    "&:hover": {
+      color: theme.palette.primary.main,
+    },
+  },
+  dialogContent: {
+    width: "100%",
+    maxWidth: 400,
+    margin: "auto",
+  },
+  deleteButton: {
+    color: theme.palette.error.main,
   },
 }));
 
 function Read() {
   const classes = useStyles();
   const theme = useTheme();
+  const history = useHistory();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [users, setUsers] = useState([]);
   const [userId, setUserId] = useState("");
   const [open, setOpen] = useState(false);
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     loadUsers();
+    const storedUser = localStorage.getItem("username");
+    if (storedUser) {
+      setUsername(storedUser);
+    }
   }, []);
 
   const loadUsers = () => {
     readUsers().then(
       (data) => {
-        console.log("users =>>", data);
         setUsers(data || []);
       },
       (error) => {
-        console.log("error =>>", error);
+        console.error("Error loading users:", error);
       }
     );
   };
@@ -79,38 +122,48 @@ function Read() {
 
   const confirmDelete = () => {
     deleteUser(userId).then(
-      (data) => {
-        console.log("users =>>", data);
+      () => {
         setUsers(users.filter((user) => user._id !== userId));
         setOpen(false);
       },
       (error) => {
-        console.log("error =>>", error);
+        console.error("Error deleting user:", error);
       }
     );
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    history.push("/login");
+  };
+
   return (
-    <React.Fragment>
-      <AppBar position="static">
+    <div className={classes.root}>
+      <AppBar position="static" className={classes.appBar}>
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
-            ReactJs CRUD App
+            React CRUD Application
           </Typography>
+          <Typography variant="body1" className={classes.greeting}>
+            Hey, {username}
+          </Typography>
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
-      <Link to="/create">
+      <Link to="/create" style={{ textDecoration: "none" }}>
         <Button
           variant="contained"
-          color="primary"
-          className={classes.button}
+          className={classes.addButton}
           startIcon={<AddIcon />}
         >
-          Create User
+          Create Employee
         </Button>
       </Link>
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
+      <TableContainer component={Paper} className={classes.tableContainer}>
+        <Table className={classes.table} aria-label="user table">
           <TableHead>
             <TableRow>
               <TableCell>S.No</TableCell>
@@ -119,32 +172,33 @@ function Read() {
               <TableCell>Age</TableCell>
               <TableCell>Gender</TableCell>
               <TableCell>State</TableCell>
-              <TableCell>CreatedAt</TableCell>
-              <TableCell>UpdatedAt</TableCell>
+              <TableCell>Created At</TableCell>
+              <TableCell>Updated At</TableCell>
               <TableCell>Update</TableCell>
               <TableCell>Delete</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell component="th" scope="row">
-                  {index + 1}
-                </TableCell>
-                <TableCell>{row.firstName + " " + row.lastName}</TableCell>
-                <TableCell>{row.email}</TableCell>
-                <TableCell>{row.age}</TableCell>
-                <TableCell>{row.gender}</TableCell>
-                <TableCell>{row.state}</TableCell>
-                <TableCell>{row.createdAt}</TableCell>
-                <TableCell>{row.updatedAt}</TableCell>
+            {users.map((user, index) => (
+              <TableRow key={user._id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{`${user.firstName} ${user.lastName}`}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.age}</TableCell>
+                <TableCell>{user.gender}</TableCell>
+                <TableCell>{user.state}</TableCell>
+                <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
                 <TableCell>
-                  <Link to={`/update/${row._id}`}>
-                    <Icon>edit</Icon>
+                  <Link to={`/update/${user._id}`}>
+                    <EditIcon className={classes.iconButton} />
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <Icon onClick={() => openDialog(row._id)}>delete</Icon>
+                  <DeleteIcon
+                    className={`${classes.iconButton} ${classes.deleteButton}`}
+                    onClick={() => openDialog(user._id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -156,22 +210,22 @@ function Read() {
           fullScreen={fullScreen}
           open={open}
           onClose={handleClose}
-          aria-labelledby="Delete User"
+          aria-labelledby="delete-user-dialog"
         >
-          <DialogContent style={{ width: 300 }}>
-            <DialogContentText>Are you sure?</DialogContentText>
+          <DialogContent className={classes.dialogContent}>
+            <DialogContentText>Are you sure you want to delete this user?</DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={handleClose} color="primary">
+            <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
-            <Button onClick={confirmDelete} color="primary" autoFocus>
+            <Button onClick={confirmDelete} color="secondary">
               Delete
             </Button>
           </DialogActions>
         </Dialog>
       )}
-    </React.Fragment>
+    </div>
   );
 }
 

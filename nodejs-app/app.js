@@ -31,6 +31,10 @@ app.use(cors());
 // Routes
 app.use("/api", userRoutes);
 
+const authRoutes = require("./routes/auth");
+
+app.use("/api/auth", authRoutes);
+
 // PORT
 const port = process.env.PORT || 3000;
 
