@@ -143,7 +143,7 @@ function Read() {
       <AppBar position="static" className={classes.appBar}>
         <Toolbar>
           <Typography variant="h6" className={classes.title}>
-            React CRUD Application
+            Employee Management System
           </Typography>
           <Typography variant="body1" className={classes.greeting}>
             Hey, {username}
@@ -187,8 +187,12 @@ function Read() {
                 <TableCell>{user.age}</TableCell>
                 <TableCell>{user.gender}</TableCell>
                 <TableCell>{user.state}</TableCell>
-                <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell>{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  {new Date(user.updatedAt).toLocaleDateString()}
+                </TableCell>
                 <TableCell>
                   <Link to={`/update/${user._id}`}>
                     <EditIcon className={classes.iconButton} />
@@ -213,7 +217,9 @@ function Read() {
           aria-labelledby="delete-user-dialog"
         >
           <DialogContent className={classes.dialogContent}>
-            <DialogContentText>Are you sure you want to delete this user?</DialogContentText>
+            <DialogContentText>
+              Are you sure you want to delete this user?
+            </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
